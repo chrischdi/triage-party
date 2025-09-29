@@ -33,5 +33,6 @@ type IItem interface {
 	GetURL() string
 	GetUpdatedAt() time.Time
 	GetUser() *User
+	GetOrgProject() string
 	String() string
 }

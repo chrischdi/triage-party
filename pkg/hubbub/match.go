@@ -83,6 +83,20 @@ func preFetchMatch(i provider.IItem, labels []*provider.Label, fs []provider.Fil
 			}
 		}
 
+		if f.AuthorRegex() != nil {
+			if ok := matchNegateRegex(*i.GetUser().Login, f.AuthorRegex(), f.AuthorNegate()); !ok {
+				klog.V(2).Infof("#%d author does not meet %s", i.GetNumber(), f.AuthorRegex())
+				return false
+			}
+		}
+
+		if f.RepositoryRegex() != nil {
+			if ok := matchNegateRegex(i.GetOrgProject(), f.RepositoryRegex(), f.RepositoryNegate()); !ok {
+				klog.V(2).Infof("#%d repository %s does not meet %s", i.GetNumber(), i.GetOrgProject(), f.RepositoryRegex())
+				return false
+			}
+		}
+
 		if f.LabelRegex() != nil {
 			if ok := matchLabel(labels, f.LabelRegex(), f.LabelNegate()); !ok {
 				klog.V(2).Infof("#%d labels do not meet %s", i.GetNumber(), f.LabelRegex())

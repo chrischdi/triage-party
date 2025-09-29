@@ -63,6 +63,9 @@ type PullRequest struct {
 	NodeID              *string    `json:"node_id,omitempty"`
 	RequestedReviewers  []*User    `json:"requested_reviewers,omitempty"`
 
+	Org     string
+	Project string
+
 	// RequestedTeams is populated as part of the PullRequestEvent.
 	// See, https://developer.github.com/v3/activity/events/types/#pullrequestevent for an example.
 	//RequestedTeams []*Team `json:"requested_teams,omitempty"`
@@ -234,6 +237,14 @@ func (p *PullRequest) GetUser() *User {
 		return nil
 	}
 	return p.User
+}
+
+// GetOrgRepo returns the Org/Project fields.
+func (p *PullRequest) GetOrgProject() string {
+	if p == nil {
+		return ""
+	}
+	return p.Org + "/" + p.Project
 }
 
 func (p PullRequest) String() string {

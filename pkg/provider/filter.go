@@ -36,6 +36,14 @@ type Filter struct {
 	titleRegex  *regexp.Regexp
 	titleNegate bool
 
+	RawAuthor    string `yaml:"author,omitempty"`
+	authorRegex  *regexp.Regexp
+	authorNegate bool
+
+	RawRepository    string `yaml:"repository,omitempty"`
+	repositoryRegex  *regexp.Regexp
+	repositoryNegate bool
+
 	RawMilestone    string `yaml:"milestone,omitempty"`
 	milestoneRegex  *regexp.Regexp
 	milestoneNegate bool
@@ -121,6 +129,50 @@ func (f *Filter) TitleRegex() *regexp.Regexp {
 
 func (f *Filter) TitleNegate() bool {
 	return f.titleNegate
+}
+
+// LoadAuthorRegex loads a new title regex
+func (f *Filter) LoadAuthorRegex() error {
+	r, negateState := negativeMatch(f.RawAuthor)
+
+	re, err := regex(r)
+	if err != nil {
+		return err
+	}
+
+	f.authorRegex = re
+	f.authorNegate = negateState
+	return nil
+}
+
+func (f *Filter) AuthorRegex() *regexp.Regexp {
+	return f.authorRegex
+}
+
+func (f *Filter) AuthorNegate() bool {
+	return f.authorNegate
+}
+
+// LoadRepositoryRegex loads a new title regex
+func (f *Filter) LoadRepositoryRegex() error {
+	r, negateState := negativeMatch(f.RawRepository)
+
+	re, err := regex(r)
+	if err != nil {
+		return err
+	}
+
+	f.repositoryRegex = re
+	f.repositoryNegate = negateState
+	return nil
+}
+
+func (f *Filter) RepositoryRegex() *regexp.Regexp {
+	return f.repositoryRegex
+}
+
+func (f *Filter) RepositoryNegate() bool {
+	return f.repositoryNegate
 }
 
 // LoadMilestoneRegex loads a new milestone regex

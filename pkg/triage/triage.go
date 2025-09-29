@@ -315,6 +315,20 @@ func processRules(raw map[string]Rule) (map[string]Rule, error) {
 				}
 			}
 
+			if f.RawAuthor != "" {
+				err := f.LoadAuthorRegex()
+				if err != nil {
+					return rules, fmt.Errorf("%q title: %w", id, err)
+				}
+			}
+
+			if f.RawRepository != "" {
+				err := f.LoadRepositoryRegex()
+				if err != nil {
+					return rules, fmt.Errorf("%q repository: %w", id, err)
+				}
+			}
+
 			if f.RawMilestone != "" {
 				err := f.LoadMilestoneRegex()
 				if err != nil {

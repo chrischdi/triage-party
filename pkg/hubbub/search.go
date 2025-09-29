@@ -142,6 +142,7 @@ func (h *Engine) SearchIssues(ctx context.Context, sp provider.SearchParams) ([]
 			}
 		}
 
+		klog.Infof("GetURL: %s", i.GetURL())
 		if seen[i.GetURL()] {
 			klog.Errorf("unusual: I already saw #%d", i.GetURL())
 			continue

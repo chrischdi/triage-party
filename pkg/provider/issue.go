@@ -203,3 +203,7 @@ func (i Issue) String() string {
 func (i Issue) IsPullRequest() bool {
 	return i.PullRequestLinks != nil
 }
+
+func (i Issue) GetOrgProject() string {
+	return i.GetRepository().GetFullName()
+}

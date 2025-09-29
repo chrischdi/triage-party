@@ -166,7 +166,7 @@ func (p *GitHubProvider) getPullRequestsListOptions(sp SearchParams) *github.Pul
 	}
 }
 
-func (p *GitHubProvider) getPullRequestsList(i []*github.PullRequest) []*PullRequest {
+func (p *GitHubProvider) getPullRequestsList(i []*github.PullRequest, org, project string) []*PullRequest {
 	r := make([]*PullRequest, len(i))
 	for k, v := range i {
 		m := PullRequest{}
@@ -178,6 +178,8 @@ func (p *GitHubProvider) getPullRequestsList(i []*github.PullRequest) []*PullReq
 		if err != nil {
 			fmt.Println(err)
 		}
+		m.Org = org
+		m.Project = project
 		r[k] = &m
 	}
 	return r
@@ -186,7 +188,7 @@ func (p *GitHubProvider) getPullRequestsList(i []*github.PullRequest) []*PullReq
 func (p *GitHubProvider) PullRequestsList(ctx context.Context, sp SearchParams) (i []*PullRequest, r *Response, err error) {
 	opt := p.getPullRequestsListOptions(sp)
 	gpr, gr, err := p.client.PullRequests.List(ctx, sp.Repo.Organization, sp.Repo.Project, opt)
-	i = p.getPullRequestsList(gpr)
+	i = p.getPullRequestsList(gpr, sp.Repo.Organization, sp.Repo.Project)
 	r = p.getResponse(gr)
 	return
 }
