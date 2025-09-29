@@ -25,9 +25,10 @@ import (
 	"github.com/google/triage-party/pkg/provider"
 
 	"github.com/google/go-github/v33/github"
-	"github.com/google/triage-party/pkg/logu"
 	"gopkg.in/yaml.v2"
 	"k8s.io/klog/v2"
+
+	"github.com/google/triage-party/pkg/logu"
 )
 
 // cachedIssues returns issues, cached if possible
@@ -275,4 +276,24 @@ func isBot(u *provider.User) bool {
 	}
 
 	return false
+}
+
+func isHouseKeeping(c *provider.Comment) bool {
+	// skip triage party comments
+	if strings.HasPrefix(strings.TrimSpace(strings.ToLower(c.GetBody())), "triage-party:") {
+		return true
+	}
+
+	// skip comments with only prow commands (housekeeping)
+	for _, l := range strings.Split(c.GetBody(), "\n") {
+		if strings.TrimSpace(l) == "" {
+			continue
+		}
+		// TODO: consider if we want to make this more string (/kind, /remove kind etc.)
+		if strings.HasPrefix(l, "/") {
+			continue
+		}
+		return false
+	}
+	return true
 }

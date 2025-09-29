@@ -45,6 +45,8 @@ type Filter struct {
 	Closed             string `yaml:"closed,omitempty"`
 	Prioritized        string `yaml:"prioritized,omitempty"`
 	Responded          string `yaml:"responded,omitempty"`
+	Commented          string `yaml:"commented,omitempty"`
+	UnTriaged          string `yaml:"un-triaged,omitempty"`
 	Reactions          string `yaml:"reactions,omitempty"`
 	ReactionsPerMonth  string `yaml:"reactions-per-month,omitempty"`
 	Comments           string `yaml:"comments,omitempty"`

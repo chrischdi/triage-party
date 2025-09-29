@@ -23,8 +23,9 @@ import (
 	"github.com/google/triage-party/pkg/persist"
 	"github.com/google/triage-party/pkg/provider"
 
-	"github.com/google/triage-party/pkg/tag"
 	"k8s.io/klog/v2"
+
+	"github.com/google/triage-party/pkg/tag"
 )
 
 func (h *Engine) cachedTimeline(ctx context.Context, sp provider.SearchParams) ([]*provider.Timeline, error) {
@@ -100,6 +101,16 @@ func (h *Engine) addEvents(ctx context.Context, sp provider.SearchParams, co *Co
 
 		if t.GetEvent() == "labeled" && t.GetLabel().GetName() == priority {
 			co.Prioritized = t.GetCreatedAt()
+		}
+
+		// We track last time the triage/accepted label was removed
+		if t.GetEvent() == "labeled" && t.GetLabel().GetName() == "triage/accepted" {
+			co.Untriaged = time.Time{}
+			delete(co.Tags, tag.UnTriaged)
+		}
+		if t.GetEvent() == "unlabeled" && t.GetLabel().GetName() == "triage/accepted" {
+			co.Untriaged = t.GetCreatedAt()
+			co.Tags[tag.UnTriaged] = true
 		}
 
 		if t.GetEvent() == "cross-referenced" {

@@ -45,6 +45,12 @@ type Conversation struct {
 	// Latest comment or event
 	Updated time.Time `json:"updated"`
 
+	// Latest comment (excluding bots and housekeeping)
+	Commented time.Time `json:"responded"`
+
+	// Latest unlabeled event for triage/accepted label
+	Untriaged time.Time `json:"untriaged"`
+
 	// Seen is the age of the data which generated this data
 	Seen         time.Time `json:"seen"`
 	CommentsSeen int       `json:"comments_seen"`

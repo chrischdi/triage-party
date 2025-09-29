@@ -21,10 +21,11 @@ import (
 	"strings"
 	"time"
 
+	"k8s.io/klog/v2"
+
 	"github.com/google/triage-party/pkg/constants"
 	"github.com/google/triage-party/pkg/provider"
 	"github.com/google/triage-party/pkg/tag"
-	"k8s.io/klog/v2"
 )
 
 var (
@@ -102,6 +103,7 @@ func (h *Engine) createConversation(i provider.IItem, cs []*provider.Comment, ag
 		klog.Errorf("debug conversation: %s", formatStruct(co))
 	}
 
+	var last *provider.Comment
 	for _, c := range cs {
 		h.parseRefs(c.Body, co, c.Updated)
 		if h.debug[co.ID] {
@@ -113,8 +115,20 @@ func (h *Engine) createConversation(i provider.IItem, cs []*provider.Comment, ag
 			continue
 		}
 
+		// We drop housekeeping comments (comments with only prow commands)
+		if isHouseKeeping(c) {
+			continue
+		}
+
+		last = c
+
 		co.LastCommentBody = c.Body
 		co.LastCommentAuthor = c.User
+
+		// We consider commented the time of the last meaningful comment
+		if co.Commented.Before(c.Updated) {
+			co.Commented = c.Updated
+		}
 
 		r := c.Reactions
 		if r.GetTotalCount() > 0 {
@@ -191,15 +205,17 @@ func (h *Engine) createConversation(i provider.IItem, cs []*provider.Comment, ag
 		}
 	}
 
-	if len(cs) > 0 {
-		last := cs[len(cs)-1]
-		assoc := strings.ToLower(last.AuthorAssoc)
-		if assoc == "none" {
-			if last.User.GetLogin() == i.GetUser().GetLogin() {
-				co.Tags[tag.AuthorLast] = true
-			}
+	// We consider last the last meaningful comment (ignoring bots, housekeeping)
+	if last != nil {
+		if last.User.GetLogin() == i.GetUser().GetLogin() {
+			co.Tags[tag.AuthorLast] = true
+		}
+
+		// We want member last to be consistent with isMember used above
+		if h.isMember(last.User.GetLogin(), last.AuthorAssoc) && !isBot(last.User) {
+			co.Tags[tag.RoleLast("member")] = true
 		} else {
-			co.Tags[tag.RoleLast(assoc)] = true
+			co.Tags[tag.RoleLast("contributor")] = true
 		}
 
 		if last.Updated.After(co.Updated) {

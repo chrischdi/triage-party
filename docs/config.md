@@ -163,12 +163,16 @@ The second rule, `many-reactions`, is more fine-grained. It is only focused on i
 
 # Elapsed time since item was created
 - created: [-+]duration   # example: +30d
-# Elapsed time since item was updated
+# Elapsed time since item was updated (including events, bots, housekeeping)
 - updated: [-+]duration
+# Elapsed time since item was commented (excluding events, bots, housekeeping) 
+- commented: [-+]duration
 # Elapsed time since item was responded to by a project member
 - responded: [-+]duration
 # Elapsed time since item was given the current priority
 - prioritized: [-+]duration
+# Elapsed time since last time triage/approved was removed from the item
+- un-triaged: [-+]duration
 
 # Number of reactions this item has received
 - reactions: [><=]int  # example: +5
@@ -207,6 +211,7 @@ Triage Party has an automatic tagging mechanism that adds annotations which can 
 * `draft`: PR is a draft PR
 * `similar`: the issue or PR appears to be similar to another
 * `open-milestone`: the issue or PR appears in an open milestone
+* `untriaged`: triage/accepted label was removed
 
 To determine review state, we support the following tags:
 

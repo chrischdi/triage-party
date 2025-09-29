@@ -23,8 +23,9 @@ import (
 
 	"github.com/google/triage-party/pkg/provider"
 
-	"github.com/google/triage-party/pkg/tag"
 	"k8s.io/klog/v2"
+
+	"github.com/google/triage-party/pkg/tag"
 )
 
 // Check if an item matches the filters, pre-comment fetch
@@ -57,12 +58,16 @@ func preFetchMatch(i provider.IItem, labels []*provider.Label, fs []provider.Fil
 			}
 		}
 
-		if f.Responded != "" {
-			if ok := matchDuration(i.GetUpdatedAt(), f.Responded); !ok {
-				klog.V(2).Infof("#%d update at %s does not meet responded %s", i.GetNumber(), i.GetUpdatedAt(), f.Responded)
-				return false
+		// This seems buggy, because it is checking updated (same as above) + there is another check for responded in postFetchMatch which is looking at the corresponding field in the conversation)
+		// Also we want to use responded as latest comment from authors (without housekeeping)
+		/*
+			if f.Responded != "" {
+				if ok := matchDuration(i.GetUpdatedAt(), f.Responded); !ok {
+					klog.V(2).Infof("#%d update at %s does not meet responded %s", i.GetNumber(), i.GetUpdatedAt(), f.Responded)
+					return false
+				}
 			}
-		}
+		*/
 
 		if f.Created != "" {
 			if ok := matchDuration(i.GetCreatedAt(), f.Created); !ok {
@@ -119,6 +124,14 @@ func preFetchMatch(i provider.IItem, labels []*provider.Label, fs []provider.Fil
 func postFetchMatch(co *Conversation, fs []provider.Filter) bool {
 	for _, f := range fs {
 		klog.V(2).Infof("post-fetch matching item #%d against filter: %+v", co.ID, f)
+
+		// We filter Commented by looking at conversations - without bots and housekeeping -.
+		if f.Commented != "" {
+			if ok := matchDuration(co.Commented, f.Commented); !ok {
+				klog.V(2).Infof("#%d commented at %s does not meet %s", co.ID, co.Commented, f.Commented)
+				return false
+			}
+		}
 
 		if f.Responded != "" {
 			if ok := matchDuration(co.LatestMemberResponse, f.Responded); !ok {
@@ -190,6 +203,13 @@ func postEventsMatch(co *Conversation, fs []provider.Filter) bool {
 		if f.Prioritized != "" {
 			if ok := matchDuration(co.Prioritized, f.Prioritized); !ok {
 				klog.V(4).Infof("#%d did not pass prioritized duration: %s vs %s", co.ID, co.LatestMemberResponse, f.Prioritized)
+				return false
+			}
+		}
+
+		if f.UnTriaged != "" {
+			if ok := matchDuration(co.Untriaged, f.UnTriaged); !ok {
+				klog.V(4).Infof("#%d did not pass untriaged duration: %s vs %s", co.ID, co.LatestMemberResponse, f.UnTriaged)
 				return false
 			}
 		}

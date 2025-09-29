@@ -44,6 +44,7 @@ var (
 	AssigneeUpdated = Tag{ID: "assignee-updated", Desc: "Issue has been updated by its assignee", NeedsComments: true}
 
 	// Timeline-based tags
+	UnTriaged               = Tag{ID: "untriaged", Desc: "triage/accepted label was removed", NeedsTimeline: true}
 	XrefApproved            = Tag{ID: "pr-approved", Desc: "Last review was an approval", NeedsTimeline: true}
 	XrefReviewedWithComment = Tag{ID: "pr-reviewed-with-comment", Desc: "Last review was a comment", NeedsTimeline: true}
 	XrefChangesRequested    = Tag{ID: "pr-changes-requested", Desc: "Last review was a request for changes", NeedsTimeline: true}

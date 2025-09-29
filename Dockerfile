@@ -34,7 +34,7 @@ COPY cmd ${SRC_DIR}/cmd/
 COPY pkg ${SRC_DIR}/pkg/
 WORKDIR $SRC_DIR
 RUN go mod download
-RUN go build cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -ldflags "${ldflags} -extldflags '-static'" cmd/server/main.go
 
 # Stage 2: Build the configured application container
 FROM gcr.io/distroless/base:latest AS triage-party
